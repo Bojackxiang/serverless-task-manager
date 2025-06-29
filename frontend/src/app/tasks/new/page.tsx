@@ -11,11 +11,40 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { TaskProvider } from "@/lib/task-context";
+import { Task, useTask } from "@/lib/task-context";
 import { ArrowLeft, Upload } from "lucide-react";
 import Link from "next/link";
 
+class task implements Task {
+  id: string;
+  title: string;
+  description: string;
+  status: "draft" | "pending" | "approved" | "rejected" | "completed";
+  priority: "low" | "medium" | "high";
+  dueDate: string;
+  createdAt: string;
+  assignedTo: string;
+  createdBy: string;
+  attachments: string[];
+  comments?: string;
+
+  constructor() {
+    this.id = "";
+    this.title = document.getElementById("title").innerText;
+    this.description = document.getElementById("description").innerText;
+    this.status = "draft";
+    this.priority = document.getElementById("priority").innerText;
+    this.dueDate = document.getElementById("dueDate").innerText;
+    this.createdAt = "";
+    this.assignedTo = document.getElementById("assignedTo").innerText;
+    this.createdBy = "";
+    this.attachments = [document.getElementById("attachments").innerText];
+    this.comments = document.getElementById("dueDate").innerText;
+  }
+}
+
 export default function NewTask() {
+  const { createTask } = useTask();
 
   return (
     <div className="flex flex-col h-screen">
@@ -29,9 +58,7 @@ export default function NewTask() {
             </Link>
           </Button>
           <div>
-            <p className="text-sm font-bold">
-              Create New Task
-            </p>
+            <p className="text-sm font-bold">Create New Task</p>
           </div>
         </div>
       </header>
@@ -48,16 +75,16 @@ export default function NewTask() {
             <CardContent>
               <div className="mb-4">
                 <p className="font-medium mb-2">Task Title *</p>
-                <Input placeholder="Enter task title"></Input>
+                <Input id="title" placeholder="Enter task title"></Input>
               </div>
               <div className="mb-4">
                 <p className="font-medium mb-2">Description *</p>
-                <Input className="" placeholder="Describe the task in detail"></Input>
+                <Input id="description" placeholder="Describe the task in detail"></Input>
               </div>
               <div className="mb-4 grid gap-x-4 md:grid-cols-2 lg:grid-cols-2">
                 <div>
                   <p className="font-medium mb-2">Priority</p>
-                  <Select>
+                  <Select id="priority">
                     <option value="high">High</option>
                     <option value="medium">Medium</option>
                     <option value="low">Low</option>
@@ -65,12 +92,12 @@ export default function NewTask() {
                 </div>
                 <div>
                   <p className="font-medium mb-2">Due Date *</p>
-                  <Input type="Date"></Input>
+                  <Input id="dueDate" type="Date"></Input>
                 </div>
               </div>
               <div className="mb-4">
                 <p className="font-medium mb-2">Assigned To *</p>
-                <Input placeholder="Enter assignee name"></Input>
+                <Input id="assignedTo" placeholder="Enter assignee name"></Input>
               </div>
               <div className="mb-4">
                 <p className="font-medium mb-2">Attachments</p>
@@ -80,13 +107,15 @@ export default function NewTask() {
                       <Upload className="h-10 w-10 text-muted-foreground"/>
                     </div>
                     <p className="font-medium text-muted-foreground my-2">Drag and drop files here, or click to browse</p>
-                    <Input type="file" id="myfile" name="myfile"></Input>
+                    <Input id="attachments" type="file"></Input>
                   </CardContent>
                 </Card>
               </div>
               <div>
-                <Button className="px-50 mr-2" size="sm" asChild>
-                  <Link href="">Create Task</Link>
+                <Button className="px-50 mr-2" size="sm" asChild onClick={
+                  () => {createTask(new task())}
+                }>
+                  <Link href="..">Create Task</Link>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
                   <Link href="/tasks">Cancel</Link>
