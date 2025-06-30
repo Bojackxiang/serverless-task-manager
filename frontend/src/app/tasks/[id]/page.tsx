@@ -20,7 +20,6 @@ export default function ViewTask({ params }: { params: Promise<{ id: string }> }
   const { getTask, deleteTask } = useTask();
   const { id } = use(params); 
   const task = getTask(id)!;
-  console.log(task);
 
   return (
     <div className="flex flex-col h-screen">
@@ -43,7 +42,7 @@ export default function ViewTask({ params }: { params: Promise<{ id: string }> }
           </Button>
         </div>
         <div className="flex items-center justify-right">
-          <Button variant="outline" size="sm" asChild onClick={() => {deleteTask(id);}}>
+          <Button variant="outline" size="sm" asChild onClick={() => {deleteTask(id)}}>
             <Link href="..">
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
@@ -147,7 +146,7 @@ export default function ViewTask({ params }: { params: Promise<{ id: string }> }
                         {file}
                       </div>
                       <div className="flex items-center justify-right">
-                        <Download className="mr-2 h-4 w-4"/>
+                        <Download className="h-4 w-4"/>
                       </div>
                     </div>
                   </Button>
