@@ -134,8 +134,8 @@ export default function NewTask() {
                   </div>
                 </div>
               ) : (<div></div>)}
-              <div>
-                <Button className="px-50 mr-2" size="sm" asChild onClick={
+              <div className="flex">
+                <Button className="flex flex-auto mr-2" size="sm" asChild onClick={
                   () => {createTask({
                     title: title,
                     description: description,

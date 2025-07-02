@@ -17,9 +17,13 @@ import { ArrowLeft, Edit, Trash2, Calendar, User, Paperclip, Download } from "lu
 import Link from "next/link";
 
 export default function ViewTask({ params }: { params: Promise<{ id: string }> }) {
-  const { getTask, deleteTask } = useTask();
+  const { loading, getTask, deleteTask } = useTask();
   const { id } = use(params); 
   const task = getTask(id)!;
+
+  if (loading) {
+    return;
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -51,9 +55,9 @@ export default function ViewTask({ params }: { params: Promise<{ id: string }> }
         </div>
       </header>
 
-      <main className="flex-1 overflow-auto p-4 space-y-6">
-        <div key={task.id} className="space-y-6">
-          <div className="mx-auto w-200">
+      <main className="flex-1 overflow-auto p-4">
+        <div className="mx-auto w-200 space-y-6">
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="flex text-2xl font-bold gap-2 mb-1">{task.title}
@@ -129,7 +133,7 @@ export default function ViewTask({ params }: { params: Promise<{ id: string }> }
               </CardContent>
             </Card>
           </div>
-          <div className="mx-auto w-200">
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="flex text-2xl font-bold gap-2 mb-1 items-center">
@@ -155,11 +159,11 @@ export default function ViewTask({ params }: { params: Promise<{ id: string }> }
             </Card>
           </div>
 
-          <div className="mx-auto w-200">
+          <div>
             <Card>
               <CardContent>
-                <div className="text-center">
-                  <Button className="px-65 mr-2" size="sm" asChild>
+                <div className="flex">
+                  <Button className="className=flex flex-auto mr-2" size="sm" asChild>
                     <Link href="">Submit for Approval</Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
