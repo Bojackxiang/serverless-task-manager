@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { use, useState, useRef } from 'react';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Card,
@@ -16,16 +16,22 @@ import { useTask } from "@/lib/task-context";
 import { ArrowLeft, Upload, Paperclip, X } from "lucide-react";
 import Link from "next/link";
 
-export default function NewTask() {
-  const { createTask } = useTask();
+export default function UpdateTask({ params }: { params: Promise<{ id: string }> }) {
+  const { loading, getTask, updateTask } = useTask();
+  const { id } = use(params); 
+  const task = getTask(id)!;
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("high");
-  const [dueDate, setDueDate] = useState("");
-  const [assignedTo, setAssignedTo] = useState("");
+  if (loading) {
+    return;
+  }
+
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description);
+  const [priority, setPriority] = useState<string>(task.priority);
+  const [dueDate, setDueDate] = useState(task.dueDate);
+  const [assignedTo, setAssignedTo] = useState(task.assignedTo);
   const [attachment, setAttachments] = useState("");
-  const [attachments, updateAttachments] = useState<string[]>([]);
+  const [attachments, updateAttachments] = useState<string[]>(task.attachments);
 
   const doUploadFileRef = useRef<HTMLInputElement>(null);
 
@@ -60,7 +66,7 @@ export default function NewTask() {
             </Link>
           </Button>
           <div>
-            <p className="text-sm font-bold">Create New Task</p>
+            <p className="text-sm font-bold">Edit Task</p>
           </div>
         </div>
       </header>
@@ -69,9 +75,9 @@ export default function NewTask() {
         <div className="mx-auto w-150">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl font-bold">Task Details</CardTitle>
+              <CardTitle className="text-2xl font-bold">Edit Task</CardTitle>
               <CardDescription>
-                Fill in the information below to create a new task
+                Edit the information below to update the task
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -90,6 +96,7 @@ export default function NewTask() {
                     <option value="high">High</option>
                     <option value="medium">Medium</option>
                     <option value="low">Low</option>
+                    {task.priority}
                   </Select>
                 </div>
                 <div>
@@ -140,21 +147,21 @@ export default function NewTask() {
               ) : (<div></div>)}
               <div className="flex">
                 <Button className="flex flex-auto mr-2" size="sm" asChild onClick={
-                  () => createTask({
+                  () => {updateTask(id, {
                     title: title,
                     description: description,
                     status: "draft" as "draft" | "pending" | "approved" | "rejected" | "completed",
                     priority: priority as "low" | "medium" | "high",
                     dueDate: dueDate,
                     assignedTo: assignedTo,
-                    createdBy: "Test User",
+                    createdBy: task.createdBy as string,
                     attachments: attachments
-                  })
+                  })}
                 }>
-                  <Link href="..">Create Task</Link>
+                  <Link href=".">Update Task</Link>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/tasks">Cancel</Link>
+                  <Link href=".">Cancel</Link>
                 </Button>
               </div>
             </CardContent>
