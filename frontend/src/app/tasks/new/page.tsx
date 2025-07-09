@@ -33,9 +33,9 @@ export default function NewTask() {
     doUploadFileRef.current!.click();
   };
 
-  const doDragandDropFile = (e: any) => {
+  const doDragandDropFile = (e: React.DragEvent) => {
     e.preventDefault();
-    const filename = e.dataTransfer.files.item(0).name;
+    const filename = e.dataTransfer.files.item(0)!.name;
     updateAttachments((existingAttachments) => [...existingAttachments].includes(filename) ? [...existingAttachments]:[...existingAttachments, filename]);
   }
 

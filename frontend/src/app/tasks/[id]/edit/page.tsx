@@ -21,10 +21,6 @@ export default function UpdateTask({ params }: { params: Promise<{ id: string }>
   const { id } = use(params); 
   const task = getTask(id)!;
 
-  if (loading) {
-    return;
-  }
-
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
   const [priority, setPriority] = useState<string>(task.priority);
@@ -39,9 +35,9 @@ export default function UpdateTask({ params }: { params: Promise<{ id: string }>
     doUploadFileRef.current!.click();
   };
 
-  const doDragandDropFile = (e: any) => {
+  const doDragandDropFile = (e: React.DragEvent) => {
     e.preventDefault();
-    const filename = e.dataTransfer.files.item(0).name;
+    const filename = e.dataTransfer.files.item(0)!.name;
     updateAttachments((existingAttachments) => [...existingAttachments].includes(filename) ? [...existingAttachments]:[...existingAttachments, filename]);
   }
 
@@ -53,6 +49,10 @@ export default function UpdateTask({ params }: { params: Promise<{ id: string }>
   const doRemoveAttachment = (file: string) => {
     updateAttachments((existingAttachments) => existingAttachments.filter((attachment: string) => attachment !== file));
   };
+
+  if (loading) {
+    return;
+  }
 
   return (
     <div className="flex flex-col h-screen">
