@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 //import { cn } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // 1. 表单验证规则（3.2）
 const loginSchema = z.object({
@@ -36,6 +37,7 @@ export default function LoginPage() {
         },
     });
 
+    const router = useRouter();
     const onSubmit = async (data: LoginData) => {
         setLoginError(null); // 清除旧错误
 
@@ -45,6 +47,7 @@ export default function LoginPage() {
 
         if (email === "admin@example.com" && password === "admin123") {
             alert("Login Successfully！");
+            router.push("/");
         } else {
             setLoginError("The email or password is incorrect");
         }
