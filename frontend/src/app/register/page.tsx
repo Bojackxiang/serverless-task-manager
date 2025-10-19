@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -23,23 +23,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/lib/auth-context';
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
 
 const registerSchema = z
   .object({
     username: z
       .string()
-      .min(3, 'Username must be at least 3 characters')
-      .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+      .min(3, "Username must be at least 3 characters")
+      .regex(
+        /^[a-zA-Z0-9_]+$/,
+        "Username can only contain letters, numbers, and underscores"
+      ),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ['confirmPassword'],
+    path: ["confirmPassword"],
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -52,9 +55,9 @@ export default function RegisterPage() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationCode, setVerificationCode] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
-  const [sentCode, setSentCode] = useState<string>(''); // For testing purposes
+  const [sentCode, setSentCode] = useState<string>(""); // For testing purposes
 
   const {
     register,
@@ -67,17 +70,17 @@ export default function RegisterPage() {
   });
 
   // Watch email field to enable/disable verify button
-  const emailValue = watch('email');
+  const emailValue = watch("email");
 
   const handleSendVerificationCode = async () => {
-    const email = getValues('email');
+    const email = getValues("email");
 
     // Validate email before sending
     if (!email || !z.string().email().safeParse(email).success) {
       toast({
-        title: 'Error',
-        description: 'Please enter a valid email address',
-        variant: 'destructive',
+        title: "Error",
+        description: "Please enter a valid email address",
+        variant: "destructive",
       });
       return;
     }
@@ -85,10 +88,10 @@ export default function RegisterPage() {
     setIsSendingCode(true);
 
     try {
-      const response = await fetch('/api/auth/send-verification', {
-        method: 'POST',
+      const response = await fetch("/api/auth/send-verification", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email }),
       });
@@ -96,7 +99,7 @@ export default function RegisterPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to send verification code');
+        throw new Error(result.error || "Failed to send verification code");
       }
 
       // Store the code for testing (in production, this wouldn't be returned)
@@ -105,15 +108,17 @@ export default function RegisterPage() {
       setShowVerificationDialog(true);
 
       toast({
-        title: 'Success',
+        title: "Success",
         description: `Verification code sent to ${email}. For testing: ${result.code}`,
       });
     } catch (error) {
       toast({
-        title: 'Error',
+        title: "Error",
         description:
-          error instanceof Error ? error.message : 'Failed to send verification code',
-        variant: 'destructive',
+          error instanceof Error
+            ? error.message
+            : "Failed to send verification code",
+        variant: "destructive",
       });
     } finally {
       setIsSendingCode(false);
@@ -121,13 +126,13 @@ export default function RegisterPage() {
   };
 
   const handleVerifyCode = async () => {
-    const email = getValues('email');
+    const email = getValues("email");
 
     if (!verificationCode || verificationCode.length !== 6) {
       toast({
-        title: 'Error',
-        description: 'Please enter a 6-digit verification code',
-        variant: 'destructive',
+        title: "Error",
+        description: "Please enter a 6-digit verification code",
+        variant: "destructive",
       });
       return;
     }
@@ -135,10 +140,10 @@ export default function RegisterPage() {
     setIsVerifying(true);
 
     try {
-      const response = await fetch('/api/auth/verify-code', {
-        method: 'POST',
+      const response = await fetch("/api/auth/verify-code", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, code: verificationCode }),
       });
@@ -146,22 +151,23 @@ export default function RegisterPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Verification failed');
+        throw new Error(result.error || "Verification failed");
       }
 
       setEmailVerified(true);
       setShowVerificationDialog(false);
-      setVerificationCode('');
+      setVerificationCode("");
 
       toast({
-        title: 'Success',
-        description: 'Email verified successfully!',
+        title: "Success",
+        description: "Email verified successfully!",
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Verification failed',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Verification failed",
+        variant: "destructive",
       });
     } finally {
       setIsVerifying(false);
@@ -171,9 +177,9 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     if (!emailVerified) {
       toast({
-        title: 'Error',
-        description: 'Please verify your email address first',
-        variant: 'destructive',
+        title: "Error",
+        description: "Please verify your email address first",
+        variant: "destructive",
       });
       return;
     }
@@ -181,10 +187,10 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username: data.username,
@@ -197,25 +203,26 @@ export default function RegisterPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Registration failed');
+        throw new Error(result.error || "Registration failed");
       }
 
       // Refresh user state to update sidebar
       await refreshUser();
 
       toast({
-        title: 'Success',
-        description: 'Account created successfully!',
+        title: "Success",
+        description: "Account created successfully!",
       });
 
       // Redirect to home page
-      router.push('/');
+      router.push("/");
       router.refresh();
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Registration failed',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Registration failed",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -223,7 +230,7 @@ export default function RegisterPage() {
   };
 
   const handleCancel = () => {
-    router.push('/');
+    router.push("/");
   };
 
   return (
@@ -246,10 +253,12 @@ export default function RegisterPage() {
                   type="text"
                   placeholder="Enter your username"
                   disabled={isLoading}
-                  {...register('username')}
+                  {...register("username")}
                 />
                 {errors.username && (
-                  <p className="text-sm text-destructive">{errors.username.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.username.message}
+                  </p>
                 )}
               </div>
 
@@ -258,7 +267,9 @@ export default function RegisterPage() {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="email">Email</Label>
                   {emailVerified && (
-                    <span className="text-xs text-green-600 font-medium">✓ Verified</span>
+                    <span className="text-xs text-green-600 font-medium">
+                      ✓ Verified
+                    </span>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -267,20 +278,24 @@ export default function RegisterPage() {
                     type="email"
                     placeholder="Enter your email"
                     disabled={isLoading || emailVerified}
-                    {...register('email')}
+                    {...register("email")}
                     className="flex-1"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleSendVerificationCode}
-                    disabled={isLoading || isSendingCode || emailVerified || !emailValue}
+                    disabled={
+                      isLoading || isSendingCode || emailVerified || !emailValue
+                    }
                   >
-                    {isSendingCode ? 'Sending...' : 'Verify'}
+                    {isSendingCode ? "Sending..." : "Verify"}
                   </Button>
                 </div>
                 {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -292,10 +307,12 @@ export default function RegisterPage() {
                   type="password"
                   placeholder="Enter your password (min 8 characters)"
                   disabled={isLoading}
-                  {...register('password')}
+                  {...register("password")}
                 />
                 {errors.password && (
-                  <p className="text-sm text-destructive">{errors.password.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -307,7 +324,7 @@ export default function RegisterPage() {
                   type="password"
                   placeholder="Confirm your password"
                   disabled={isLoading}
-                  {...register('confirmPassword')}
+                  {...register("confirmPassword")}
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-destructive">
@@ -323,7 +340,7 @@ export default function RegisterPage() {
                   className="w-full"
                   disabled={isLoading || !emailVerified}
                 >
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
+                  {isLoading ? "Creating Account..." : "Create Account"}
                 </Button>
 
                 <Button
@@ -339,7 +356,7 @@ export default function RegisterPage() {
             </form>
 
             <div className="mt-4 text-center text-sm">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <Link href="/login" className="text-primary underline">
                 Sign in
               </Link>
@@ -349,7 +366,10 @@ export default function RegisterPage() {
       </div>
 
       {/* Verification Dialog */}
-      <Dialog open={showVerificationDialog} onOpenChange={setShowVerificationDialog}>
+      <Dialog
+        open={showVerificationDialog}
+        onOpenChange={setShowVerificationDialog}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Verify Email Address</DialogTitle>
@@ -372,7 +392,9 @@ export default function RegisterPage() {
                 placeholder="Enter 6-digit code"
                 maxLength={6}
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                onChange={(e) =>
+                  setVerificationCode(e.target.value.replace(/\D/g, ""))
+                }
                 disabled={isVerifying}
               />
             </div>
@@ -384,14 +406,18 @@ export default function RegisterPage() {
               variant="outline"
               onClick={() => {
                 setShowVerificationDialog(false);
-                setVerificationCode('');
+                setVerificationCode("");
               }}
               disabled={isVerifying}
             >
               Cancel
             </Button>
-            <Button type="button" onClick={handleVerifyCode} disabled={isVerifying}>
-              {isVerifying ? 'Verifying...' : 'Verify'}
+            <Button
+              type="button"
+              onClick={handleVerifyCode}
+              disabled={isVerifying}
+            >
+              {isVerifying ? "Verifying..." : "Verify"}
             </Button>
           </DialogFooter>
         </DialogContent>

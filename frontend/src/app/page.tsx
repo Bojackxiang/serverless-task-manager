@@ -1,230 +1,88 @@
-"use client";
-
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTask } from "@/lib/task-context";
-import { CheckSquare, Clock, FileText, Plus, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Header } from "@/components/landing/header";
+import { FeatureSection } from "@/components/landing/feature-section";
+import {
+  CollaborationIllustration,
+  ScalingIllustration,
+  TaskBoardIllustration,
+} from "@/components/landing/illustration";
+import { Footer } from "@/components/landing/footer";
 
-export default function Dashboard() {
-  const { tasks, loading } = useTask();
-
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
-
-  const taskStats = {
-    total: tasks.length,
-    pending: tasks.filter((t) => t.status === "pending").length,
-    approved: tasks.filter((t) => t.status === "approved").length,
-    completed: tasks.filter((t) => t.status === "completed").length,
-    draft: tasks.filter((t) => t.status === "draft").length,
-  };
-
-  const recentTasks = tasks.slice(0, 5);
-
+export default function Home() {
   return (
-    <div className="flex flex-col h-screen">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger className="-ml-1" />
-        <div className="flex flex-1 items-center justify-between">
-          <div>
-            <h1 className="text-lg font-semibold">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">
-              Welcome back! Here &rsquo; s your task overview.
+    <div className="min-h-screen flex flex-col">
+      <Header />
+
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="py-20 px-4 lg:py-32">
+          <div className="container mx-auto text-center space-y-8">
+            <h1 className="font-bold text-4xl lg:text-6xl text-balance max-w-4xl mx-auto">
+              Serverless Project Management for Modern Teams
+            </h1>
+            <p className="text-muted-foreground text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed text-pretty">
+              Experience the power of Jira-like project management without the
+              infrastructure overhead. Built for speed, scalability, and
+              seamless collaboration.
             </p>
-          </div>
-          <Button asChild>
-            <Link href="/tasks/new">
-              <Plus className="mr-2 h-4 w-4" />
-              New Task
-            </Link>
-          </Button>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-auto p-4 space-y-6">
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{taskStats.total}</div>
-              <p className="text-xs text-muted-foreground">+2 from last week</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Pending Approval
-              </CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{taskStats.pending}</div>
-              <p className="text-xs text-muted-foreground">Awaiting review</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completed</CardTitle>
-              <CheckSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{taskStats.completed}</div>
-              <p className="text-xs text-muted-foreground">
-                +12% from last month
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Success Rate
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">94%</div>
-              <p className="text-xs text-muted-foreground">
-                Task completion rate
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Tasks */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Tasks</CardTitle>
-            <CardDescription>
-              Your latest task activities and updates
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium">{task.title}</h3>
-                      <Badge
-                        variant={
-                          task.status === "completed"
-                            ? "default"
-                            : task.status === "approved"
-                            ? "secondary"
-                            : task.status === "pending"
-                            ? "outline"
-                            : task.status === "rejected"
-                            ? "destructive"
-                            : "secondary"
-                        }
-                      >
-                        {task.status}
-                      </Badge>
-                      <Badge
-                        variant={
-                          task.priority === "high"
-                            ? "destructive"
-                            : task.priority === "medium"
-                            ? "outline"
-                            : "secondary"
-                        }
-                      >
-                        {task.priority}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-1">
-                      {task.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Due: {new Date(task.dueDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/tasks/${task.id}`}>View</Link>
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 text-center">
-              <Button variant="outline" asChild>
-                <Link href="/tasks">View All Tasks</Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button size="lg" asChild>
+                <Link href="/register">Get Started Free</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="#features">Learn More</Link>
               </Button>
             </div>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
-  );
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="flex flex-col h-screen">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger className="-ml-1" />
-        <div className="flex flex-1 items-center justify-between">
-          <div>
-            <Skeleton className="h-6 w-32 mb-2" />
-            <Skeleton className="h-4 w-64" />
           </div>
-          <Skeleton className="h-10 w-24" />
-        </div>
-      </header>
+        </section>
 
-      <main className="flex-1 overflow-auto p-4 space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader className="space-y-0 pb-2">
-                <Skeleton className="h-4 w-24" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16 mb-2" />
-                <Skeleton className="h-3 w-20" />
-              </CardContent>
-            </Card>
-          ))}
+        {/* Feature Sections */}
+        <div id="features">
+          <FeatureSection
+            title="Track Progress Effortlessly"
+            description="Monitor your team's progress with intuitive boards and real-time updates. Create, assign, and track tasks with ease. Our serverless architecture ensures lightning-fast performance without any maintenance overhead."
+            imagePosition="left"
+            icon={<CheckCircle2 className="w-6 h-6" />}
+            illustration={<TaskBoardIllustration />}
+          />
+
+          <FeatureSection
+            title="Collaborate Seamlessly"
+            description="Bring your team together with powerful collaboration tools. Share updates, comment on tasks, and keep everyone aligned. Built-in notifications ensure no one misses important changes or deadlines."
+            imagePosition="right"
+            icon={<Users className="w-6 h-6" />}
+            illustration={<CollaborationIllustration />}
+          />
+
+          <FeatureSection
+            title="Scale Without Limits"
+            description="Powered by serverless technology, JiraFlow scales automatically with your team's needs. From small startups to enterprise teams, enjoy consistent performance and reliability without worrying about infrastructure."
+            imagePosition="left"
+            icon={<Zap className="w-6 h-6" />}
+            illustration={<ScalingIllustration />}
+          />
         </div>
 
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32 mb-2" />
-            <Skeleton className="h-4 w-48" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="p-4 border rounded-lg">
-                  <Skeleton className="h-5 w-48 mb-2" />
-                  <Skeleton className="h-4 w-full mb-1" />
-                  <Skeleton className="h-3 w-24" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* CTA Section */}
+        <section className="py-20 px-4 bg-muted/50">
+          <div className="container mx-auto text-center space-y-6">
+            <h2 className="font-bold text-3xl lg:text-4xl text-balance">
+              Ready to Transform Your Workflow?
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+              Join teams already using JiraFlow to streamline their project
+              management.
+            </p>
+            <Button size="lg" asChild>
+              <Link href="/register">Start Your Free Trial</Link>
+            </Button>
+          </div>
+        </section>
       </main>
+
+      <Footer />
     </div>
   );
 }

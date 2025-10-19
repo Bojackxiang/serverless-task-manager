@@ -34,14 +34,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <TaskProvider>
-            <SidebarProvider>
-              <AppSidebar />
-              <main className="flex-1 overflow-hidden">{children}</main>
-            </SidebarProvider>
-          </TaskProvider>
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
