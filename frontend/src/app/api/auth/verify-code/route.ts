@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { verificationStorage } from '@/lib/verification-storage';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { verificationStorage } from "@/lib/verification-storage";
 
 const verifyCodeSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  code: z.string().length(6, 'Verification code must be 6 digits'),
+  email: z.string().email("Invalid email address"),
+  code: z.string().length(6, "Verification code must be 6 digits"),
 });
 
 export async function POST(request: NextRequest) {
@@ -14,10 +14,12 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validationResult = verifyCodeSchema.safeParse(body);
     if (!validationResult.success) {
-      return NextResponse.json(
-        { error: validationResult.error.errors[0].message },
-        { status: 400 }
-      );
+      const message =
+        validationResult.error.issues &&
+        validationResult.error.issues.length > 0
+          ? validationResult.error.issues[0].message
+          : "Invalid input";
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
     const { email, code } = validationResult.data;
@@ -27,19 +29,19 @@ export async function POST(request: NextRequest) {
 
     if (!isValid) {
       return NextResponse.json(
-        { error: 'Invalid or expired verification code' },
+        { error: "Invalid or expired verification code" },
         { status: 400 }
       );
     }
 
     return NextResponse.json({
-      message: 'Email verified successfully',
+      message: "Email verified successfully",
       verified: true,
     });
   } catch (error) {
-    console.error('Verify code error:', error);
+    console.error("Verify code error:", error);
     return NextResponse.json(
-      { error: 'An error occurred while verifying code' },
+      { error: "An error occurred while verifying code" },
       { status: 500 }
     );
   }

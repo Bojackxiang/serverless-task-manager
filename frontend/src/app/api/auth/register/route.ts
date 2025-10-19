@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { hashPassword, createToken, setAuthCookie } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { hashPassword, createToken, setAuthCookie } from "@/lib/auth";
 
 const registerSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
   emailVerified: z.boolean(),
 });
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const validationResult = registerSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: validationResult.error.errors[0].message },
+        { error: validationResult.error.issues[0].message },
         { status: 400 }
       );
     }
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     // Check if email verification is required
     if (!emailVerified) {
       return NextResponse.json(
-        { error: 'Email must be verified before registration' },
+        { error: "Email must be verified before registration" },
         { status: 400 }
       );
     }
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUserByEmail) {
       return NextResponse.json(
-        { error: 'An account with this email already exists' },
+        { error: "An account with this email already exists" },
         { status: 400 }
       );
     }
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUserByUsername) {
       return NextResponse.json(
-        { error: 'This username is already taken' },
+        { error: "This username is already taken" },
         { status: 400 }
       );
     }
@@ -97,12 +97,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       user: userWithoutPassword,
-      message: 'Registration successful',
+      message: "Registration successful",
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     return NextResponse.json(
-      { error: 'An error occurred during registration' },
+      { error: "An error occurred during registration" },
       { status: 500 }
     );
   }

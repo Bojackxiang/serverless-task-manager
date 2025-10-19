@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthCookie, clearAuthCookie, verifyToken } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { getAuthCookie, clearAuthCookie, verifyToken } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const token = await getAuthCookie();
 
@@ -21,11 +21,11 @@ export async function POST(request: NextRequest) {
       await clearAuthCookie();
     }
 
-    return NextResponse.json({ message: 'Logout successful' });
+    return NextResponse.json({ message: "Logout successful" });
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
     return NextResponse.json(
-      { error: 'An error occurred during logout' },
+      { error: "An error occurred during logout" },
       { status: 500 }
     );
   }

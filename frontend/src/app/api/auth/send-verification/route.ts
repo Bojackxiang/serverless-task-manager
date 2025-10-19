@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { verificationStorage } from '@/lib/verification-storage';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { verificationStorage } from "@/lib/verification-storage";
 
 const sendVerificationSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email("Invalid email address"),
 });
 
 // Generate random 6-digit code
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const validationResult = sendVerificationSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: validationResult.error.errors[0].message },
+        { error: validationResult.error.issues[0].message },
         { status: 400 }
       );
     }
@@ -41,14 +41,14 @@ export async function POST(request: NextRequest) {
     console.log(`Verification code for ${email}: ${code}`);
 
     return NextResponse.json({
-      message: 'Verification code sent successfully',
+      message: "Verification code sent successfully",
       // TODO: Remove this in production - only for testing
       code,
     });
   } catch (error) {
-    console.error('Send verification error:', error);
+    console.error("Send verification error:", error);
     return NextResponse.json(
-      { error: 'An error occurred while sending verification code' },
+      { error: "An error occurred while sending verification code" },
       { status: 500 }
     );
   }
