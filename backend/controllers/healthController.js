@@ -1,5 +1,5 @@
-const { checkHealth } = require('../services/healthService');
-const { sendResponse } = require('../utils/response');
+const { checkHealth } = require("../services/healthService");
+const { sendResponse } = require("../utils/response");
 
 async function health(req, res) {
   try {
@@ -7,13 +7,13 @@ async function health(req, res) {
     sendResponse(res, {
       success: true,
       payload: result,
-      message: 'Health check successful'
+      message: "Health check successful",
     });
   } catch (error) {
     sendResponse(res, {
       success: false,
       payload: null,
-      message: error.message || 'Health check failed'
+      message: error.message || "Health check failed",
     });
   }
 }
