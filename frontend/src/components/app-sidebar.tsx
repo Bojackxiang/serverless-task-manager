@@ -1,4 +1,6 @@
-import { Calendar, CheckSquare, FileText, Home, Plus, Settings, Users } from "lucide-react"
+'use client';
+
+import { Calendar, CheckSquare, FileText, Home, LogOut, Plus, Settings, Users } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +14,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
+import { useAuth } from "@/lib/auth-context"
 
 const menuItems = [
   {
@@ -42,6 +45,12 @@ const menuItems = [
 ]
 
 export function AppSidebar() {
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border">
@@ -92,13 +101,30 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
+        {user && (
+          <div className="px-2 py-2 mb-2">
+            <div className="text-xs text-muted-foreground mb-1">Logged in as</div>
+            <div className="text-sm font-medium truncate">{user.username}</div>
+            <div className="text-xs text-muted-foreground truncate">{user.email}</div>
+          </div>
+        )}
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <Settings className="h-4 w-4" />
-              <span>Settings</span>
+            <SidebarMenuButton asChild>
+              <Link href="/settings">
+                <Settings className="h-4 w-4" />
+                <span>Settings</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          {user && (
+            <SidebarMenuItem>
+              <SidebarMenuButton onClick={handleLogout}>
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
