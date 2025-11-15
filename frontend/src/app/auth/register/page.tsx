@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-//import {router} from "next/client";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 
 interface RegisterData {
     name: string;
@@ -16,26 +16,6 @@ interface RegisterData {
     confirmPassword: string;
     agreeToTerms: boolean;
 }
-
-const mockUsers: RegisterData[] = [];
-
-const mockRegister = async (userData: RegisterData) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const existingUser = mockUsers.find((u) => u.email === userData.email);
-    if (existingUser) {
-        return { success: false, error: "This email address has been registered!" };
-    }
-    const newUser = {
-        id: mockUsers.length + 1,
-        email: userData.email,
-        name: userData.name,
-        password: userData.password,
-        confirmPassword: userData.confirmPassword,
-        agreeToTerms: userData.agreeToTerms
-    };
-    mockUsers.push(newUser);
-    return { success: true, user: newUser };
-};
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState<RegisterData>({
@@ -48,6 +28,9 @@ export default function RegisterPage() {
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+
+    const { register } = useAuth();
+    const router = useRouter();
 
     const validate = (): boolean => {
         if (formData.name.length < 2) {
@@ -70,21 +53,21 @@ export default function RegisterPage() {
             setError("You must agree to the terms of service.");
             return false;
         }
-        setError("");
         return true;
     };
 
-    const router = useRouter();
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
+        setSuccess("");
+
         if (!validate()) return;
 
-        const result = await mockRegister(formData);
-
-        if (!result.success) {
-            setError(result.error ?? "");
+        const result = await register(formData);
+        if (!result) {
+            setError("This email address has already been registered.");
         } else {
-            setSuccess("Registered successfully!\n");
+            setSuccess("Registered successfully!");
             setFormData({
                 name: "",
                 email: "",
@@ -94,13 +77,6 @@ export default function RegisterPage() {
             });
             alert("Register successfully. Now you are redirected to the login page...");
             router.push("/auth/login");
-
-            return (
-                <form onSubmit={handleSubmit}>
-                    {/* your form fields here */}
-                    <button type="submit">Login</button>
-                </form>
-            );
         }
     };
 
@@ -143,7 +119,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="mb-4">
-                    <Label htmlFor="confirmPassword">Conform Password</Label>
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
                     <Input
                         id="confirmPassword"
                         type="password"
@@ -157,7 +133,7 @@ export default function RegisterPage() {
                         id="terms"
                         onChange={(e) => {
                             const input = e.target as HTMLInputElement;
-                            setFormData({ ...formData, agreeToTerms: input.checked });
+                            setFormData({...formData, agreeToTerms: input.checked});
                         }}
                     />
                     <Label htmlFor="terms" className="text-sm">

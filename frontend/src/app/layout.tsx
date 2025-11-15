@@ -4,6 +4,7 @@ import "./globals.css";
 import { TaskProvider } from "@/lib/task-context";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AuthProvider } from "@/lib/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,17 +30,19 @@ export default function RootLayout({
   console.log("Current env is", process.env.NEXT_PUBLIC_APP_ENV);
   console.log("================================================");
   return (
-    <html lang="en">
+      <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+      <AuthProvider>
         <TaskProvider>
           <SidebarProvider>
             <AppSidebar />
             <main className="flex-1 overflow-hidden">{children}</main>
           </SidebarProvider>
         </TaskProvider>
+      </AuthProvider>
       </body>
-    </html>
+      </html>
   );
 }
