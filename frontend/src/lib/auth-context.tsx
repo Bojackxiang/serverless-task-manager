@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import {router} from "next/client";
 
 export interface User {
     id: number;
@@ -142,7 +143,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem("user");
         setUser(null);
        // setIsAuthenticated(false);
-        window.location.replace("/auth/login");
+        router.push("/auth/login");
     };
 
     const value: AuthContextType = {
