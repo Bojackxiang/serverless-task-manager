@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    // ➤ 初始化：检查 localStorage
+    // 初始化：检查 localStorage
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
     }, []);
 
-    // ➤ 登录逻辑
+    // 登录逻辑
     const login = async (email: string, password: string) => {
         setAuthError(null);
         setLoading(true);
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    // ➤ 注册逻辑
+    // 注册逻辑
     const register = async (userData: RegisterData): Promise<boolean> => {
         setAuthError(null);
         setLoading(true);
@@ -131,13 +131,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             return true;
 
         } catch (err) {
-            handleAuthError(err);   // 核心：调用统一错误处理
+            handleAuthError(err);
             setLoading(false);
             return false;
         }
     };
 
-    // ➤ 登出逻辑
+    // 登出逻辑
     const logout = () => {
         console.log("[auth-context] Logout clicked");
         localStorage.removeItem("user");
@@ -163,7 +163,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 };
 
-// ➤ 自定义 hook，方便其他组件使用
+// 自定义 hook，方便其他组件使用
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) throw new Error("useAuth must be used within AuthProvider");

@@ -33,9 +33,7 @@ export default function RegisterPage() {
     const { register } = useAuth();
     const router = useRouter();
 
-    // ----------------------------
     // 实时验证
-    // ----------------------------
     const validateRealtime = {
         name:
             formData.name.length > 0 && formData.name.length < 2
@@ -60,9 +58,7 @@ export default function RegisterPage() {
                 : null,
     };
 
-    // ----------------------------
     // 最终提交验证
-    // ----------------------------
     const validateBeforeSubmit = (): boolean => {
         if (validateRealtime.name) return setError(validateRealtime.name), false;
         if (validateRealtime.email) return setError(validateRealtime.email), false;

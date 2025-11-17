@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
         "test@example.com",
         "admin@demo.com",
         "user1@mail.com",
-        "your.email@example.com", // ✅ 你可以在这里添加你真实注册的邮箱
+        "your.email@example.com",
     ];
 
     const handleSubmit = (e: React.FormEvent) => {
