@@ -11,7 +11,7 @@ export const useAuthGuard = () => {
     // 未登录 → 重定向
     useEffect(() => {
         if (!loading && !user) {
-            router.replace("/auth/login");
+            router.push("/auth/login");
         }
     }, [user, loading, router]);
 

@@ -5,11 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
-interface RegisterData {
+interface RegisterFormData {
+    id: number;
     name: string;
     email: string;
     password: string;
@@ -17,8 +16,40 @@ interface RegisterData {
     agreeToTerms: boolean;
 }
 
+// 获取所有字段验证错误
+const getValidationErrors = (data: RegisterFormData) => ({
+    name:
+        data.name.length === 0
+            ? "Name is required."
+            : data.name.length < 2
+                ? "The name should be at least two characters long."
+                : null,
+
+    email:
+        data.email.length === 0
+            ? "Email is required."
+            : !/\S+@\S+\.\S+/.test(data.email)
+                ? "The email address format is invalid."
+                : null,
+
+    password:
+        data.password.length === 0
+            ? "Password is required."
+            : !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/.test(data.password)
+                ? "Must contain uppercase, lowercase and numbers, at least 8 characters."
+                : null,
+
+    confirmPassword:
+        data.confirmPassword.length === 0
+            ? "Please confirm your password."
+            : data.confirmPassword !== data.password
+                ? "The passwords entered twice are inconsistent."
+                : null,
+});
+
 export default function RegisterPage() {
-    const [formData, setFormData] = useState<RegisterData>({
+    const [formData, setFormData] = useState<RegisterFormData>({
+        id: 0,
         name: "",
         email: "",
         password: "",
@@ -26,44 +57,28 @@ export default function RegisterPage() {
         agreeToTerms: false,
     });
 
+    const [touched, setTouched] = useState({
+        name: false,
+        email: false,
+        password: false,
+        confirmPassword: false,
+    });
+
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register } = useAuth();
-    const router = useRouter();
 
-    // 实时验证
-    const validateRealtime = {
-        name:
-            formData.name.length > 0 && formData.name.length < 2
-                ? "The name should be at least two characters long."
-                : null,
+    const validationErrors = getValidationErrors(formData);
 
-        email:
-            formData.email.length > 0 && !/\S+@\S+\.\S+/.test(formData.email)
-                ? "The email address format is invalid."
-                : null,
-
-        password:
-            formData.password.length > 0 &&
-            !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/.test(formData.password)
-                ? "Must contain uppercase, lowercase and numbers, at least 8 characters."
-                : null,
-
-        confirmPassword:
-            formData.confirmPassword.length > 0 &&
-            formData.confirmPassword !== formData.password
-                ? "The passwords entered twice are inconsistent."
-                : null,
-    };
-
-    // 最终提交验证
-    const validateBeforeSubmit = (): boolean => {
-        if (validateRealtime.name) return setError(validateRealtime.name), false;
-        if (validateRealtime.email) return setError(validateRealtime.email), false;
-        if (validateRealtime.password) return setError(validateRealtime.password), false;
-        if (validateRealtime.confirmPassword) return setError(validateRealtime.confirmPassword), false;
+    // 提交验证
+    const validateBeforeSubmit = () => {
+        const errors = getValidationErrors(formData);
+        if (errors.name) return setError(errors.name), false;
+        if (errors.email) return setError(errors.email), false;
+        if (errors.password) return setError(errors.password), false;
+        if (errors.confirmPassword) return setError(errors.confirmPassword), false;
 
         if (!formData.agreeToTerms) {
             setError("You must agree to the terms of service.");
@@ -78,6 +93,13 @@ export default function RegisterPage() {
         setError("");
         setSuccess("");
 
+        setTouched({
+            name: true,
+            email: true,
+            password: true,
+            confirmPassword: true,
+        });
+
         if (!validateBeforeSubmit()) return;
 
         setIsSubmitting(true);
@@ -88,49 +110,28 @@ export default function RegisterPage() {
             setError("This email address has already been registered.");
         } else {
             setSuccess("Registered successfully!");
-            setFormData({
-                name: "",
-                email: "",
-                password: "",
-                confirmPassword: "",
-                agreeToTerms: false,
-            });
-            router.push("/auth/login");
+            window.location.href = "/auth/login";
         }
     };
+
+    const showError = (field: keyof typeof validationErrors) =>
+        touched[field] && validationErrors[field];
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
             <form
                 onSubmit={handleSubmit}
-                className="
-                    bg-white p-8 rounded-2xl shadow-lg
-                    w-full max-w-md sm:max-w-sm
-                    transition-all duration-300 ease-in-out
-                    animate-fade-in
-                "
-                aria-describedby={error ? "register-error" : undefined}
+                className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md transition-all duration-300"
             >
                 <div className="text-center mb-6">
-                    <h1 className="text-3xl font-bold mb-2 text-gray-800">Register</h1>
+                    <h1 className="text-3xl font-bold">Register</h1>
                     <p className="text-sm text-muted-foreground">
                         Create your account to get started.
                     </p>
                 </div>
 
-                {/* 全局错误 */}
-                {error && (
-                    <div id="register-error" className="text-red-600 mb-4 text-sm font-medium" role="alert">
-                        {error}
-                    </div>
-                )}
-
-                {/* 全局成功 */}
-                {success && (
-                    <p className="text-green-600 mb-4 text-sm font-medium" role="status">
-                        {success}
-                    </p>
-                )}
+                {error && <p className="text-red-600 mb-4">{error}</p>}
+                {success && <p className="text-green-600 mb-4">{success}</p>}
 
                 {/* Name */}
                 <div className="mb-4">
@@ -139,18 +140,13 @@ export default function RegisterPage() {
                         id="name"
                         value={formData.name}
                         onChange={(e) =>
-                            setFormData({ ...formData, name: e.target.value })
+                            setFormData({...formData, name: e.target.value})
                         }
-                        aria-invalid={!!validateRealtime.name}
-                        aria-describedby={
-                            validateRealtime.name ? "name-error" : undefined
-                        }
-                        className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        onBlur={() => setTouched({...touched, name: true})}
+                        className={showError("name") ? "border-red-500" : ""}
                     />
-                    {validateRealtime.name && (
-                        <p id="name-error" className="text-sm text-red-500 mt-1" role="alert">
-                            {validateRealtime.name}
-                        </p>
+                    {showError("name") && (
+                        <p className="text-sm text-red-500">{validationErrors.name}</p>
                     )}
                 </div>
 
@@ -161,18 +157,13 @@ export default function RegisterPage() {
                         id="email"
                         value={formData.email}
                         onChange={(e) =>
-                            setFormData({ ...formData, email: e.target.value })
+                            setFormData({...formData, email: e.target.value})
                         }
-                        aria-invalid={!!validateRealtime.email}
-                        aria-describedby={
-                            validateRealtime.email ? "email-error" : undefined
-                        }
-                        className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        onBlur={() => setTouched({...touched, email: true})}
+                        className={showError("email") ? "border-red-500" : ""}
                     />
-                    {validateRealtime.email && (
-                        <p id="email-error" className="text-sm text-red-500 mt-1" role="alert">
-                            {validateRealtime.email}
-                        </p>
+                    {showError("email") && (
+                        <p className="text-sm text-red-500">{validationErrors.email}</p>
                     )}
                 </div>
 
@@ -184,18 +175,13 @@ export default function RegisterPage() {
                         type="password"
                         value={formData.password}
                         onChange={(e) =>
-                            setFormData({ ...formData, password: e.target.value })
+                            setFormData({...formData, password: e.target.value})
                         }
-                        aria-invalid={!!validateRealtime.password}
-                        aria-describedby={
-                            validateRealtime.password ? "password-error" : undefined
-                        }
-                        className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        onBlur={() => setTouched({...touched, password: true})}
+                        className={showError("password") ? "border-red-500" : ""}
                     />
-                    {validateRealtime.password && (
-                        <p id="password-error" className="text-sm text-red-500 mt-1" role="alert">
-                            {validateRealtime.password}
-                        </p>
+                    {showError("password") && (
+                        <p className="text-sm text-red-500">{validationErrors.password}</p>
                     )}
                 </div>
 
@@ -207,19 +193,18 @@ export default function RegisterPage() {
                         type="password"
                         value={formData.confirmPassword}
                         onChange={(e) =>
-                            setFormData({ ...formData, confirmPassword: e.target.value })
+                            setFormData({...formData, confirmPassword: e.target.value})
                         }
-                        aria-invalid={!!validateRealtime.confirmPassword}
-                        aria-describedby={
-                            validateRealtime.confirmPassword
-                                ? "confirm-error"
-                                : undefined
+                        onBlur={() =>
+                            setTouched({...touched, confirmPassword: true})
                         }
-                        className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className={
+                            showError("confirmPassword") ? "border-red-500" : ""
+                        }
                     />
-                    {validateRealtime.confirmPassword && (
-                        <p id="confirm-error" className="text-sm text-red-500 mt-1" role="alert">
-                            {validateRealtime.confirmPassword}
+                    {showError("confirmPassword") && (
+                        <p className="text-sm text-red-500">
+                            {validationErrors.confirmPassword}
                         </p>
                     )}
                 </div>
@@ -228,64 +213,34 @@ export default function RegisterPage() {
                 <div className="mb-4 flex items-center space-x-2">
                     <Checkbox
                         id="terms"
-                        onChange={(e) => {
-                            const input = e.target as HTMLInputElement;
-                            setFormData({...formData, agreeToTerms: input.checked});
-                        }}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                agreeToTerms: (e.target as HTMLInputElement).checked,
+                            })
+                        }
                     />
-                    <Label htmlFor="terms" className="text-sm">
-                        I agree to the terms of service.
-                    </Label>
+                    <Label htmlFor="terms">I agree to the terms of service.</Label>
                 </div>
 
-                {/* 提交按钮 */}
+                {/* Submit */}
                 <Button
                     type="submit"
-                    className="
-                        w-full mt-2
-                        transition-transform duration-200
-                        hover:scale-[1.01]
-                        disabled:opacity-60
-                    "
+                    className="mt-3 w-full"
                     disabled={isSubmitting}
                 >
-                    {isSubmitting ? (
-                        <span className="flex items-center justify-center gap-2">
-                            <svg
-                                className="w-4 h-4 animate-spin"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                ></circle>
-                                <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v8H4z"
-                                ></path>
-                            </svg>
-                            Registering...
-                        </span>
-                    ) : (
-                        "Register"
-                    )}
+                    {isSubmitting ? "Registering..." : "Register"}
                 </Button>
 
                 <p className="text-sm text-center mt-4">
                     Already have an account?{" "}
-                    <Link
-                        href="/auth/login"
-                        className="text-blue-600 hover:underline transition-colors"
+                    <button
+                        type="button"
+                        onClick={() => (window.location.href = "/auth/login")}
+                        className="text-blue-600 hover:underline bg-transparent p-0 border-none cursor-pointer text-sm"
                     >
                         Login
-                    </Link>
+                    </button>
                 </p>
             </form>
         </div>

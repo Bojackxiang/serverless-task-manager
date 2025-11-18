@@ -16,11 +16,25 @@ import { CheckSquare, Clock, FileText, Plus, TrendingUp } from "lucide-react";
 import Link from "next/link";
 //import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
+import UserAvatar from "@/components/ui/UserAvatar";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const { tasks} = useTask();
   const { logout } = useAuth();
   const { user, shouldBlock } = useAuthGuard();
+  const [displayName, setDisplayName] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [avatar, setAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      const savedName = localStorage.getItem(`displayName_${user.id}`);
+      const savedAvatar = localStorage.getItem(`userAvatar_${user.id}`);
+      setDisplayName(savedName || user.name || "Guest");
+      setAvatar(savedAvatar || "/Picture.png");
+    }
+  }, [user]);
 
   if (shouldBlock) {
     return null;
@@ -46,12 +60,13 @@ export default function Dashboard() {
             <div>
               <h1 className="text-lg font-semibold">Dashboard</h1>
               <p className="text-sm text-muted-foreground">
-                Welcome back, {user?.name}! Here&rsquo;s your task overview.
+                Welcome back, {displayName || "Guest"}! Here&rsquo;s your task overview.
               </p>
             </div>
 
             {/* 右侧：按钮组 */}
             <div className="flex items-center gap-3">
+              <UserAvatar/>
               <Button asChild>
                 <Link href="/tasks/new">
                   <Plus className="mr-2 h-4 w-4"/>

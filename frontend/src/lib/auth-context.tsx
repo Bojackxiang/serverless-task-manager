@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import {router} from "next/client";
+//import {router} from "next/client";
 
 export interface User {
     id: number;
@@ -10,8 +10,9 @@ export interface User {
 }
 
 interface RegisterData {
-    email: string;
+    id: number;
     name: string;
+    email: string;
     password: string;
 }
 
@@ -29,15 +30,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // src/lib/auth-context.tsx
 
 // mock 用户数据
-const mockUsers: RegisterData[] = [
-    { email: "admin@example.com", name: "Admin", password: "admin123" },
-];
+// const mockUsers: RegisterData[] = [
+//     { email: "admin@example.com", name: "Admin", password: "admin123" },
+// ];
 
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [authError, setAuthError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [users, setUsers] = useState<RegisterData[]>([]);
 
     const handleAuthError = (err: unknown) => {
         if (err instanceof Error) {
@@ -55,10 +58,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 初始化：检查 localStorage
     useEffect(() => {
+        const storedUsers = localStorage.getItem("users");
+        if (storedUsers) {
+            setUsers(JSON.parse(storedUsers));
+        } else {
+            const defaultAdmin = [{
+                id: 1,
+                name: "Admin",
+                email: "admin@example.com",
+                password: "admin123"
+            }];
+            localStorage.setItem("users", JSON.stringify(defaultAdmin));
+            setUsers(defaultAdmin);
+        }
+
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            const parsed = JSON.parse(storedUser);
+            setUser(parsed);
+
+            const avatarKey = `userAvatar_${parsed.id}`;
+            if (!localStorage.getItem(avatarKey)) {
+                localStorage.setItem(avatarKey, "/Picture.png");
+            }
         }
+
         setLoading(false);
     }, []);
 
@@ -67,24 +91,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setAuthError(null);
         setLoading(true);
         try {
-            if (Math.random() < 0.1) {
-                throw new Error("NetworkError: Connection timeout");
-            }
-
             await new Promise((res) => setTimeout(res, 1000));
 
-            if (Math.random() < 0.05) {
-                throw new Error("ServerError: Internal server error");
-            }
+            const storedUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]") as RegisterData[];
 
-            const found = mockUsers.find((u) => u.email === email && u.password === password);
+            const found = storedUsers.find((u) => u.email === email && u.password === password);
             if (!found) {
                 throw new Error("AuthError: Invalid email or password");
             }
 
-            const userInfo = { id: 1, email: found.email, name: found.name };
-            setUser(userInfo);
-            localStorage.setItem("user", JSON.stringify(userInfo));
+            const storedDisplayName = localStorage.getItem(`displayName_${found.id}`) || found.name;
+            const loggedInUser = {
+                id: found.id,
+                email: found.email,
+                name: storedDisplayName,
+            };
+
+            setUser(loggedInUser);
+            localStorage.setItem("user", JSON.stringify(loggedInUser));
+
+            localStorage.setItem(`displayName_${found.id}`, storedDisplayName);
+            localStorage.setItem(`email_${found.id}`, found.email);
+            if (!localStorage.getItem(`userAvatar_${found.id}`)) {
+                localStorage.setItem(`userAvatar_${found.id}`, "/Picture.png");
+            }
+
             setLoading(false);
             return true;
 
@@ -101,31 +132,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(true);
 
         try {
-            // 模拟网络错误（10% 概率）
-            if (Math.random() < 0.1) {
-                throw new Error("NetworkError: Connection timeout");
-            }
-
             await new Promise((res) => setTimeout(res, 1000));
 
-            // 模拟服务器错误（5% 概率）
-            if (Math.random() < 0.05) {
-                throw new Error("ServerError: Internal server error");
-            }
+            // 读取已有用户
+            const storedUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]") as RegisterData[];
 
-            // 账号已存在（验证错误）
-            const exists = mockUsers.find((u) => u.email === userData.email);
+            const exists = storedUsers.find((u) => u.email === userData.email);
             if (exists) {
                 throw new Error("AuthError: Email already registered");
             }
 
-            // 创建新用户
-            mockUsers.push(userData);
-            const newUser = { id: mockUsers.length, email: userData.email, name: userData.name };
-            setUser(newUser);
+            // 用邮箱生成稳定 ID
+            const hashEmail = (email: string): number => {
+                let hash = 0;
+                for (let i = 0; i < email.length; i++) {
+                    hash = (hash << 5) - hash + email.charCodeAt(i);
+                    hash |= 0;
+                }
+                return Math.abs(hash);
+            };
 
-            // 持久化
-            localStorage.setItem("user", JSON.stringify(newUser));
+            const newUser = {
+                id: hashEmail(userData.email),
+                email: userData.email,
+                password: userData.password,
+                name: userData.name,
+            };
+
+            // 存入本地用户列表
+            storedUsers.push(newUser);
+            localStorage.setItem("registeredUsers", JSON.stringify(storedUsers));
+
+            // 单独存 displayName 和 avatar
+            localStorage.setItem(`displayName_${newUser.id}`, newUser.name);
+            localStorage.setItem(`userAvatar_${newUser.id}`, "/Picture.png");
+
+            // 登录状态写入
+            setUser({ id: newUser.id, email: newUser.email, name: newUser.name });
+            localStorage.setItem("user", JSON.stringify({ id: newUser.id, email: newUser.email, name: newUser.name }));
 
             setLoading(false);
             return true;
@@ -143,7 +187,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem("user");
         setUser(null);
        // setIsAuthenticated(false);
-        router.push("/auth/login");
+        window.location.href = "/auth/login";
     };
 
     const value: AuthContextType = {

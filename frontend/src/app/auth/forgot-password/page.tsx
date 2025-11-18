@@ -4,19 +4,10 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-
-    // 模拟注册用户邮箱数据库
-    const registeredEmails = [
-        "test@example.com",
-        "admin@demo.com",
-        "user1@mail.com",
-        "your.email@example.com",
-    ];
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,6 +17,24 @@ export default function ForgotPasswordPage() {
             return;
         }
 
+        // 从 localStorage 中读取注册用户列表
+        const stored = localStorage.getItem("registeredUsers");
+        let registeredEmails: string[] = [];
+
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed)) {
+                    registeredEmails = parsed
+                        .filter((u) => typeof u.email === "string")
+                        .map((u) => u.email.toLowerCase());
+                }
+            } catch (err) {
+                console.error("Error parsing registered users", err);
+            }
+        }
+
+        // 检查是否匹配
         if (registeredEmails.includes(email.toLowerCase())) {
             setStatus("success");
         } else {
@@ -46,7 +55,6 @@ export default function ForgotPasswordPage() {
                     </p>
                 </div>
 
-                {/* 提示内容 */}
                 {status === "success" && (
                     <div className="text-green-600 text-center mb-4" role="status">
                         ✅ A reset link has been sent to <strong>{email}</strong>.
@@ -58,7 +66,6 @@ export default function ForgotPasswordPage() {
                     </div>
                 )}
 
-                {/* 表单输入 */}
                 <div className="mb-4">
                     <Label htmlFor="email">Email</Label>
                     <Input
@@ -82,12 +89,13 @@ export default function ForgotPasswordPage() {
 
                 <p className="text-sm text-center mt-4">
                     Back to{" "}
-                    <Link
-                        href="/auth/login"
-                        className="text-blue-600 hover:underline"
+                    <button
+                        type="button"
+                        onClick={() => (window.location.href = "/auth/login")}
+                        className="text-blue-600 hover:underline bg-transparent p-0 border-none cursor-pointer text-sm"
                     >
                         Login
-                    </Link>
+                    </button>
                 </p>
             </form>
         </div>
