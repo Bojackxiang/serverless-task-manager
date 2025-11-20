@@ -1,10 +1,13 @@
 # 项目初始化指南 (Project Initialization Guide)
 
 ## 项目概述
+
 这是一个基于 Node.js + Express 后端和 Next.js 前端的全栈任务管理系统，使用 PostgreSQL 数据库和 Prisma ORM。
 
 ## 系统要求
+
 在开始之前，请确保您的系统已安装以下软件：
+
 - Node.js (版本 18.0 或更高)
 - npm (通常与 Node.js 一起安装)
 - Git
@@ -13,6 +16,7 @@
 ## 快速开始
 
 ### 1. 克隆项目
+
 ```bash
 git clone https://github.com/Bojackxiang/serverless-task-manager.git
 cd serverless-task-manager
@@ -20,28 +24,34 @@ cd serverless-task-manager
 
 ### 2. 后端设置
 
-#### 2.1 进入后端目录
+#### 2.1 进入后端目录...
+
 ```bash
 cd backend
 ```
 
 #### 2.2 安装依赖
+
 ```bash
 npm install
 ```
 
 #### 2.3 环境变量配置
+
 后端目录中已包含 `.env` 文件，包含以下配置：
+
 ```
 PORT=8000
 DATABASE_URL="postgresql://neondb_owner:npg_0Hl9xEWRSofn@ep-late-lake-a7p75j1h-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channelBinding=require"
 ```
 
-**注意：** 
+**注意：**
+
 - 如果您想使用自己的数据库，请修改 `DATABASE_URL`
 - 确保 PostgreSQL 数据库可以正常连接
 
 #### 2.4 数据库设置
+
 ```bash
 # 生成 Prisma 客户端
 npm run db:generate
@@ -57,6 +67,7 @@ npm run db:studio
 ```
 
 #### 2.5 启动后端服务器
+
 ```bash
 npm run dev
 ```
@@ -66,16 +77,19 @@ npm run dev
 ### 3. 前端设置
 
 #### 3.1 打开新的终端窗口，进入前端目录
+
 ```bash
 cd frontend
 ```
 
 #### 3.2 安装依赖
+
 ```bash
 npm install
 ```
 
 #### 3.3 启动前端开发服务器
+
 ```bash
 npm run dev
 ```
@@ -85,6 +99,7 @@ npm run dev
 ## 项目架构说明
 
 ### 后端架构 (Backend)
+
 ```
 backend/
 ├── controllers/        # 控制器层，处理 HTTP 请求
@@ -99,6 +114,7 @@ backend/
 ```
 
 ### 前端架构 (Frontend)
+
 ```
 frontend/
 ├── src/
@@ -113,6 +129,7 @@ frontend/
 ## 开发流程
 
 ### 数据库操作
+
 ```bash
 # 在 backend 目录下执行以下命令：
 
@@ -133,6 +150,7 @@ npm run db:studio
 ```
 
 ### 前端开发
+
 ```bash
 # 在 frontend 目录下执行：
 
@@ -150,6 +168,7 @@ npm run lint
 ```
 
 ### 后端开发
+
 ```bash
 # 在 backend 目录下执行：
 
@@ -160,13 +179,17 @@ npm run dev
 ## 常见问题解决
 
 ### 1. 数据库连接问题
+
 如果遇到数据库连接错误：
+
 - 检查 `.env` 文件中的 `DATABASE_URL` 是否正确
 - 确保数据库服务器正在运行
 - 检查网络连接和防火墙设置
 
 ### 2. 依赖安装问题
+
 如果 `npm install` 失败：
+
 ```bash
 # 清理依赖并重新安装
 npm run clean
@@ -175,11 +198,14 @@ npm install
 ```
 
 ### 3. 端口冲突
+
 如果端口 3000 或 8000 被占用：
+
 - 前端：修改 `next.config.ts` 或使用 `npm run dev -- -p 3001`
 - 后端：修改 `.env` 文件中的 `PORT` 值
 
 ### 4. Prisma 相关问题
+
 ```bash
 # 重新生成 Prisma 客户端
 npx prisma generate
@@ -191,12 +217,14 @@ npx prisma db push --preview-feature
 ## 项目特性
 
 ### 技术栈
+
 - **后端**: Node.js + Express + Prisma + PostgreSQL
 - **前端**: Next.js 15 + React 19 + TypeScript + Tailwind CSS
 - **UI 组件**: Radix UI + shadcn/ui
 - **数据库**: PostgreSQL (Neon Cloud)
 
 ### 主要功能
+
 - 任务管理系统
 - RESTful API
 - 响应式前端界面
@@ -205,11 +233,13 @@ npx prisma db push --preview-feature
 ## 部署说明
 
 ### 后端部署
+
 1. 设置生产环境的环境变量
 2. 运行数据库迁移: `npx prisma migrate deploy`
 3. 启动应用: `npm start`
 
 ### 前端部署
+
 1. 构建应用: `npm run build`
 2. 启动生产服务器: `npm start`
 
@@ -223,6 +253,7 @@ npx prisma db push --preview-feature
 ## 获取帮助
 
 如果在项目初始化过程中遇到问题，请：
+
 1. 检查系统要求是否满足
 2. 查看常见问题解决方案
 3. 检查项目的 GitHub Issues
