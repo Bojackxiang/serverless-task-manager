@@ -24,7 +24,7 @@ cd serverless-task-manager
 
 ### 2. 后端设置
 
-#### 2.1 进入后端目录
+#### 2.1 进入后端目录...
 
 ```bash
 cd backend
